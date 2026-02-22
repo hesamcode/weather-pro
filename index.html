@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Pro</title>
+    <meta
+      name="description"
+      content="Weather Pro: atmospheric mobile-first weather app with autocomplete, forecasts, charts, and resilient offline-aware UX."
+    />
+    <link rel="preconnect" href="https://geocoding-api.open-meteo.com" />
+    <link rel="preconnect" href="https://api.open-meteo.com" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script defer src="js/app.js"></script>
+  </head>
+  <body data-atmosphere="clear-day">
+    <a class="skip-link" href="#mainContent">Skip to main content</a>
+
+    <div class="page-wrap">
+      <header class="app-header">
+        <div class="brand-block">
+          <p class="eyebrow">Atmospheric Forecast</p>
+          <h1>Weather Pro</h1>
+          <p class="subtitle">Forecasts designed for clarity on every screen.</p>
+        </div>
+
+        <div class="header-controls" aria-label="Theme, unit, and about controls">
+          <button id="themeToggle" class="btn" type="button" aria-pressed="false">Theme: Light</button>
+
+          <div class="unit-switch" role="group" aria-label="Temperature unit">
+            <button id="unitC" class="btn unit-btn" type="button" aria-pressed="true">C</button>
+            <button id="unitF" class="btn unit-btn" type="button" aria-pressed="false">F</button>
+          </div>
+
+          <button id="aboutOpenBtn" class="btn" type="button">About</button>
+        </div>
+      </header>
+
+      <main id="mainContent">
+        <section class="search-shell card" aria-label="City search">
+          <form id="searchForm" autocomplete="off" novalidate>
+            <label for="cityInput">Search city</label>
+            <div class="search-field-row">
+              <div class="combobox-wrap">
+                <input
+                  id="cityInput"
+                  name="city"
+                  type="text"
+                  placeholder="Search city (e.g., Lisbon, Seoul)"
+                  required
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-controls="autocompleteList"
+                  aria-activedescendant=""
+                  aria-describedby="searchAssist"
+                />
+                <ul id="autocompleteList" class="autocomplete-list" role="listbox" hidden></ul>
+              </div>
+              <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+          </form>
+          <p id="searchAssist" class="assistive-note">Type at least 2 characters for suggestions.</p>
+          <p id="statusText" class="status-text" role="status" aria-live="polite"></p>
+        </section>
+
+        <section id="loadingState" class="loading-shell" aria-hidden="true" hidden>
+          <article class="card skeleton-card" aria-hidden="true">
+            <div class="skeleton sk-pill"></div>
+            <div class="skeleton sk-title"></div>
+            <div class="skeleton sk-temp"></div>
+            <div class="skeleton sk-line"></div>
+            <div class="skeleton sk-line short"></div>
+          </article>
+
+          <article class="card skeleton-card" aria-hidden="true">
+            <div class="skeleton sk-pill"></div>
+            <div class="skeleton sk-title"></div>
+            <div class="skeleton sk-chart"></div>
+          </article>
+
+          <article class="card skeleton-card" aria-hidden="true">
+            <div class="skeleton sk-pill"></div>
+            <div class="skeleton sk-title"></div>
+            <div class="skeleton sk-line"></div>
+            <div class="skeleton sk-line"></div>
+            <div class="skeleton sk-line short"></div>
+          </article>
+        </section>
+
+        <section id="errorState" class="error-shell card" role="alert" hidden>
+          <p class="error-tag">Weather service issue</p>
+          <h2>Unable to load weather data</h2>
+          <p id="errorMessage">Please try again shortly.</p>
+          <div class="error-actions">
+            <button id="retryBtn" class="btn btn-primary" type="button">Try again</button>
+          </div>
+        </section>
+
+        <section id="weatherContent" class="weather-layout" aria-label="Weather details" hidden>
+          <article class="hero-card card" aria-labelledby="currentHeading">
+            <div class="card-head">
+              <h2 id="currentHeading">Current Conditions</h2>
+              <button id="favoriteToggle" class="btn" type="button" aria-pressed="false">Add favorite</button>
+            </div>
+
+            <p id="locationLine" class="location-line">-</p>
+
+            <div class="hero-main">
+              <p id="currentTemp" class="hero-temp">--</p>
+              <p id="currentLabel" class="hero-label">-</p>
+            </div>
+
+            <dl class="metric-grid">
+              <div class="metric-item">
+                <dt>Feels like</dt>
+                <dd id="feelsLike">--</dd>
+              </div>
+              <div class="metric-item">
+                <dt>Humidity</dt>
+                <dd id="humidity">--</dd>
+              </div>
+              <div class="metric-item">
+                <dt>Wind</dt>
+                <dd id="wind">--</dd>
+              </div>
+              <div class="metric-item">
+                <dt>Precipitation</dt>
+                <dd id="precipitation">--</dd>
+              </div>
+            </dl>
+
+            <p id="lastUpdated" class="updated-line">Updated: --</p>
+          </article>
+
+          <article class="chart-card card" aria-labelledby="hourlyHeading">
+            <div class="card-head">
+              <h2 id="hourlyHeading">Hourly Temperature</h2>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="hourlyChart" aria-label="Hourly temperature chart" role="img"></canvas>
+              <p id="chartMessage" class="empty-line" hidden></p>
+            </div>
+          </article>
+
+          <section class="forecast-panel card" aria-labelledby="forecastHeading">
+            <div class="card-head">
+              <h2 id="forecastHeading">7-Day Forecast</h2>
+              <p class="swipe-hint">Swipe cards on mobile</p>
+            </div>
+            <div class="forecast-rail-wrap">
+              <ul id="forecastList" class="forecast-rail" aria-label="Seven day forecast cards"></ul>
+            </div>
+          </section>
+        </section>
+
+        <section class="saved-layout" aria-label="Favorites and recent searches">
+          <article class="card" aria-labelledby="favoritesHeading">
+            <div class="card-head">
+              <h2 id="favoritesHeading">Favorites</h2>
+            </div>
+            <ul id="favoritesList" class="saved-list" aria-live="polite"></ul>
+          </article>
+
+          <article class="card" aria-labelledby="recentHeading">
+            <div class="card-head">
+              <h2 id="recentHeading">Recent Searches</h2>
+            </div>
+            <ul id="recentList" class="saved-list" aria-live="polite"></ul>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div id="aboutModal" class="about-modal" hidden>
+      <div class="about-backdrop" data-close-about></div>
+      <section
+        id="aboutDialog"
+        class="about-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="aboutTitle"
+        aria-describedby="aboutText"
+        tabindex="-1"
+      >
+        <div class="card-head">
+          <h2 id="aboutTitle">About Weather Pro</h2>
+          <button id="aboutCloseBtn" class="btn" type="button" aria-label="Close about dialog">Close</button>
+        </div>
+        <p id="aboutText">
+          Built by
+          <a
+            href="https://hesamkhorshidi.github.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visit Hesam Khorshidi portfolio website"
+            >Hesam Khorshidi</a
+          >.
+        </p>
+      </section>
+    </div>
+
+    <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+    <footer class="app-footer">
+      <p>
+        Built by
+        <a href="https://hesamkhorshidi.github.io"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Visit Hesam Khorshidi portfolio website">
+          Hesam Khorshidi
+        </a>
+      </p>
+    </footer>
+  </body>
+</html>
