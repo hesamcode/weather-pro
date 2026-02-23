@@ -91,5 +91,5 @@ Used fields include:
 - Reduced-motion support via `prefers-reduced-motion`
 
 Author
-Hesam Khorshidi
-Portfolio: https://hesamkhorshidi.github.io
+HesamCode
+Portfolio: https://hesamcode.github.io
